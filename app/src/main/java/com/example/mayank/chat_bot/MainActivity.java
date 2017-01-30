@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.provider.AlarmClock;
 import android.provider.ContactsContract;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     String toPlay = "";
     EditText ed;
     EditText playSong;
+    
 
 
     @Override
@@ -73,8 +76,11 @@ public class MainActivity extends AppCompatActivity {
 
     void getMusic()
     {
-        ContentResolver cr = this.getContentResolver();
+        toPlay = playSong.getText().toString();
+        toPlay = toPlay.replaceAll("\\s+","");
+        toPlay = toPlay.toLowerCase();
 
+        ContentResolver cr = this.getContentResolver();
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
@@ -93,14 +99,23 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("the list is", data);
                     String tempData = data.replaceAll("\\s+","");
                     tempData = tempData.toLowerCase();
-
-
+                    if (tempData.contains(toPlay))
+                        playMusic(data);
                 }
 
             }
         }
 
         cur.close();
+    }
+
+    void playMusic(String path)
+    {
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        File file = new File(path);
+        intent.setDataAndType(Uri.fromFile(file), "audio/*");
+        startActivity(intent);
     }
 
     void searchContact()
